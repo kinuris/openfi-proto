@@ -1,6 +1,7 @@
 /migration/README.md
 /entity/target
 /target
+/sites
 
 .env
 depl.sh
