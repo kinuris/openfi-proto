@@ -1,0 +1,7 @@
+/migration/README.md
+/entity/target
+/target
+
+.env
+depl.sh
+data.sqlite
