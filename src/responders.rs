@@ -58,4 +58,28 @@ pub mod file {
 
         Ok((headers, body))
     }
+
+    pub async fn simple_open(
+        path: PathBuf,
+    ) -> Result<(HeaderMap, impl IntoResponse), StatusCode> {
+        let file = tokio::fs::File::open(&path)
+            .await
+            .map_err(|_| StatusCode::NOT_FOUND)?;
+    
+        let stream = ReaderStream::new(file);
+        let body = StreamBody::new(stream);
+    
+        let mut headers = HeaderMap::new();
+        let mime_type = path.get_mime_type();
+    
+        headers.append(
+            header::CONTENT_TYPE,
+            HeaderValue::from_str(mime_type.essence_str()).unwrap(),
+        );
+    
+        Ok((headers, body))
+    }
 }
+
+
+
