@@ -20,7 +20,7 @@ pub async fn index(
     State(state): State<AppState>,
     TrueClientIp(ip): TrueClientIp,
     req: Request<Body>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
     let mac = session.get::<String>("mac");
     let mac = match mac {
         Some(mac) => mac,
@@ -33,11 +33,17 @@ pub async fn index(
                     .unwrap()
             })
             .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Problem sent to admin"))?;
+            // TODO: Send problem to admin email
 
             let parsed_output = std::str::from_utf8(&output.stdout).unwrap();
-            let parsed_output = serde_json::from_str::<RawClientData>(parsed_output)
-                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            let parsed_output =
+                serde_json::from_str::<RawClientData>(parsed_output).map_err(|_| {
+                    (
+                        StatusCode::EXPECTATION_FAILED,
+                        "Disconnect and reconnect to wifi",
+                    )
+                })?;
 
             session.insert("mac", &parsed_output.mac).unwrap();
 

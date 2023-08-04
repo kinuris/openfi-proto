@@ -15,12 +15,16 @@ pub async fn request_access(
     State(state): State<AppState>,
     // State(client_connections): State<ClientConnections>,
     mut session: WritableSession,
-) -> Result<(), (StatusCode, &'static str)> {
+) -> Result<(), (StatusCode, String)> {
     let mac = session.get::<String>("mac");
     let mac = match mac {
         Some(mac) => mac,
         None => {
-            let data = status(ip).await.unwrap();
+            let data = status(ip).await.map_err(|(s, h)| {
+                // TODO: Send email to admin
+                
+                (s, h.0)
+            })?;
             session.insert("mac", &data.mac).unwrap();
 
             data.mac.clone()
@@ -32,19 +36,19 @@ pub async fn request_access(
         .one(&state.connection)
         .await
         .unwrap()
-        .ok_or_else(|| (StatusCode::FORBIDDEN, "Forbidden: Report sent to admin"))?; // TODO:
+        .ok_or_else(|| (StatusCode::FORBIDDEN, "Forbidden: Report sent to admin".to_owned()))?; // TODO:
 
     if client.remaining_seconds <= 0 {
         return Err((
             StatusCode::FORBIDDEN,
-            "No Remaining Seconds: Purchase a plan",
+            "No Remaining Seconds: Purchase a plan".to_owned(),
         ));
     }
 
     let mut active_map = state.active_clients.lock().await;
 
     if active_map.contains_key(&client.mac) {
-        return Err((StatusCode::FORBIDDEN, "Already Active"));
+        return Err((StatusCode::FORBIDDEN, "Already Active".to_owned()));
     }
 
     active_map.insert(client.mac.clone(), client.remaining_seconds);
@@ -53,7 +57,7 @@ pub async fn request_access(
         Command::new("ndsctl").arg("auth").arg(mac).spawn().unwrap()
     })
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Server Error"))?;
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Server Error".to_owned()))?;
 
     Ok(())
 }

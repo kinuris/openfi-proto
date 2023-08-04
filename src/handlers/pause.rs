@@ -12,12 +12,16 @@ pub async fn pause(
     ip: TrueClientIp,
     State(state): State<AppState>,
     mut session: WritableSession,
-) -> Result<(), (StatusCode, &'static str)> {
+) -> Result<(), (StatusCode, String)> {
     let mac = session.get::<String>("mac");
     let mac = match mac {
         Some(mac) => mac,
         None => {
-            let data = status(ip).await.unwrap();
+            let data = status(ip).await.map_err(|(s, h)| {
+                // TODO: Send email to admin
+                
+                (s, h.0)
+            })?;
             session.insert("mac", &data.mac).unwrap();
 
             data.mac.clone()
@@ -26,7 +30,7 @@ pub async fn pause(
 
     let mut active_clients = state.active_clients.lock().await;
     if !active_clients.contains_key(&mac) {
-        return Err((StatusCode::FORBIDDEN, "Connection Not Active"));
+        return Err((StatusCode::FORBIDDEN, "Connection Not Active".to_owned()));
     }
 
     active_clients.remove_entry(&mac);
@@ -39,7 +43,7 @@ pub async fn pause(
             .unwrap()
     })
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Server Error"))?;
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Server Error".to_owned()))?;
 
     Ok(())
 }
