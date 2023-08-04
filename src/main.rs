@@ -5,7 +5,7 @@ use std::sync::Arc;
 use axum::routing::post;
 use axum::{routing::get, Router};
 use axum_sessions::{async_session::MemoryStore, SessionLayer};
-use openfi_proto::client_timer::decrement_active_user;
+use openfi_proto::client_timer::{assure_auth_client_state, decrement_active_user};
 use tokio::sync::Mutex;
 
 use migration::{Migrator, MigratorTrait};
@@ -28,6 +28,9 @@ async fn main() {
         connection.clone(),
         active_clients.clone(),
     ));
+
+    // Separate thread
+    tokio::spawn(assure_auth_client_state(active_clients.clone()));
 
     let session_layer = SessionLayer::new(
         MemoryStore::new(),
