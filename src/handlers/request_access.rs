@@ -22,7 +22,7 @@ pub async fn request_access(
         None => {
             let data = status(ip).await.map_err(|(s, h)| {
                 // TODO: Send email to admin
-                
+
                 (s, h.0)
             })?;
             session.insert("mac", &data.mac).unwrap();
@@ -36,7 +36,12 @@ pub async fn request_access(
         .one(&state.connection)
         .await
         .unwrap()
-        .ok_or_else(|| (StatusCode::FORBIDDEN, "Forbidden: Report sent to admin".to_owned()))?; // TODO:
+        .ok_or_else(|| {
+            (
+                StatusCode::FORBIDDEN,
+                "Forbidden: Report sent to admin".to_owned(),
+            )
+        })?; // TODO:
 
     if client.remaining_seconds <= 0 {
         return Err((

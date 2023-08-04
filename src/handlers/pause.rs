@@ -19,7 +19,7 @@ pub async fn pause(
         None => {
             let data = status(ip).await.map_err(|(s, h)| {
                 // TODO: Send email to admin
-                
+
                 (s, h.0)
             })?;
             session.insert("mac", &data.mac).unwrap();
