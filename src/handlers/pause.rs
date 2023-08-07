@@ -1,3 +1,4 @@
+#![allow(warnings, unused)]
 use std::process::Command;
 
 use axum::{extract::State, http::StatusCode};
@@ -8,6 +9,7 @@ use crate::AppState;
 
 use super::status::status;
 
+#[cfg(not(debug_assertions))]
 pub async fn pause(
     ip: TrueClientIp,
     State(state): State<AppState>,
@@ -41,9 +43,16 @@ pub async fn pause(
             .arg(mac)
             .spawn()
             .unwrap()
+            .wait()
+            .unwrap();
     })
     .await
     .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Server Error".to_owned()))?;
 
+    Ok(())
+}
+
+#[cfg(debug_assertions)]
+pub async fn pause() -> Result<(), (StatusCode, String)> {
     Ok(())
 }

@@ -1,3 +1,4 @@
+#![allow(warnings, unused)]
 use std::process::Command;
 
 use axum::{extract::State, http::StatusCode};
@@ -10,10 +11,10 @@ use crate::AppState;
 
 use super::status::status;
 
+#[cfg(not(debug_assertions))]
 pub async fn request_access(
     ip: TrueClientIp,
     State(state): State<AppState>,
-    // State(client_connections): State<ClientConnections>,
     mut session: WritableSession,
 ) -> Result<(), (StatusCode, String)> {
     let mac = session.get::<String>("mac");
@@ -58,11 +59,24 @@ pub async fn request_access(
 
     active_map.insert(client.mac.clone(), client.remaining_seconds);
 
+    // TODO: Create ndsctl rust wrapper (with NDSCtlConfig struct)
+
     tokio::task::spawn_blocking(move || {
-        Command::new("ndsctl").arg("auth").arg(mac).spawn().unwrap()
+        Command::new("ndsctl")
+            .arg("auth")
+            .arg(mac)
+            .spawn()
+            .unwrap()
+            .wait()
+            .unwrap();
     })
     .await
     .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Server Error".to_owned()))?;
 
+    Ok(())
+}
+
+#[cfg(debug_assertions)]
+pub async fn request_access() -> Result<(), (StatusCode, String)> {
     Ok(())
 }

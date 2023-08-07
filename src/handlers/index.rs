@@ -21,6 +21,8 @@ pub async fn index(
     TrueClientIp(ip): TrueClientIp,
     req: Request<Body>,
 ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+    use entity::admin_mac;
+
     let mac = session.get::<String>("mac");
     let mac = match mac {
         Some(mac) => mac,
@@ -51,6 +53,16 @@ pub async fn index(
         }
     };
 
+    let possible_admin = admin_mac::Entity::find()
+        .filter(admin_mac::Column::Mac.contains(&mac))
+        .one(&state.connection)
+        .await
+        .unwrap();
+
+    if possible_admin.is_some() {
+        session.insert("admin", true).unwrap();
+    }
+
     let possible_client = client::Entity::find()
         .filter(client::Column::Mac.contains(&mac))
         .one(&state.connection)
@@ -68,10 +80,10 @@ pub async fn index(
         client.insert(&state.connection).await.unwrap();
     }
 
-    Ok(file::simple_open("./sites/index.html".parse().unwrap()).await)
+    Ok(file::simple_open("./sites/index/index.html".parse().unwrap()).await)
 }
 
 #[cfg(debug_assertions)]
 pub async fn index(req: Request<Body>) -> Result<impl IntoResponse, StatusCode> {
-    Ok(file::open("./sites/index.html".parse().unwrap(), &req).await)
+    Ok(file::open("./sites/index/index.html".parse().unwrap(), &req).await)
 }
