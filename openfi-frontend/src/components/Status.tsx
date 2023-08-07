@@ -1,8 +1,21 @@
-import { $, component$, useSignal } from "@builder.io/qwik";
+import { $, component$, useSignal, useStylesScoped$ } from "@builder.io/qwik";
 import { secondsToFormattedTime } from "~/util/time";
 import type { ClientData } from "~/util/types";
 
 export default component$(({ data }: { data: ClientData }) => {
+
+    useStylesScoped$(`
+        button {
+            padding: 0.3em 1em;
+            border-radius: 10px;
+            font-size: 1.5em;
+            margin-top: 1em;
+        }
+
+        div p {
+            text-align: center;
+        }
+    `);
 
     const disabled = useSignal(false);
 
