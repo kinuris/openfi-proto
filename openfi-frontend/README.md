@@ -1,47 +1,71 @@
-# Svelte + TS + Vite
+# Qwik City App ⚡️
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+- [Qwik Docs](https://qwik.builder.io/)
+- [Discord](https://qwik.builder.io/chat)
+- [Qwik GitHub](https://github.com/BuilderIO/qwik)
+- [@QwikDev](https://twitter.com/QwikDev)
+- [Vite](https://vitejs.dev/)
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Project Structure
 
-## Need an official Svelte framework?
+This project is using Qwik with [QwikCity](https://qwik.builder.io/qwikcity/overview/). QwikCity is just an extra set of tools on top of Qwik to make it easier to build a full site, including directory-based routing, layouts, and more.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+Inside your project, you'll see the following directory structure:
 
-## Technical considerations
+```
+├── public/
+│   └── ...
+└── src/
+    ├── components/
+    │   └── ...
+    └── routes/
+        └── ...
+```
 
-**Why use this over SvelteKit?**
+- `src/routes`: Provides the directory-based routing, which can include a hierarchy of `layout.tsx` layout files, and an `index.tsx` file as the page. Additionally, `index.ts` files are endpoints. Please see the [routing docs](https://qwik.builder.io/qwikcity/routing/overview/) for more info.
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+- `src/components`: Recommended directory for components.
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+- `public`: Any static assets, like images, can be placed in the public directory. Please see the [Vite public directory](https://vitejs.dev/guide/assets.html#the-public-directory) for more info.
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+## Add Integrations and deployment
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+Use the `yarn qwik add` command to add additional integrations. Some examples of integrations includes: Cloudflare, Netlify or Express Server, and the [Static Site Generator (SSG)](https://qwik.builder.io/qwikcity/guides/static-site-generation/).
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+```shell
+yarn qwik add # or `yarn qwik add`
+```
 
-**Why include `.vscode/extensions.json`?**
+## Development
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+Development mode uses [Vite's development server](https://vitejs.dev/). The `dev` command will server-side render (SSR) the output during development.
 
-**Why enable `allowJs` in the TS template?**
+```shell
+npm start # or `yarn start`
+```
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+> Note: during dev mode, Vite may request a significant number of `.js` files. This does not represent a Qwik production build.
 
-**Why is HMR not preserving my local component state?**
+## Preview
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
+The preview command will create a production build of the client modules, a production build of `src/entry.preview.tsx`, and run a local server. The preview server is only for convenience to preview a production build locally and should not be used as a production server.
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+```shell
+yarn preview # or `yarn preview`
+```
 
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+## Production
+
+The production build will generate client and server modules by running both client and server build commands. The build command will use Typescript to run a type check on the source code.
+
+```shell
+yarn build # or `yarn build`
+```
+
+## Static Site Generator (Node.js)
+
+```
+yarn build.server
 ```
