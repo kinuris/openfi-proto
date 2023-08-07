@@ -4,6 +4,8 @@
 /sites
 
 .env
+.env.production
+
 depl.sh
 data.sqlite
 .DS_Store
