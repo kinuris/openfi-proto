@@ -23,5 +23,7 @@ serde_json = "1.0.104"
 tokio = { version = "1.29.1", features = ["rt-multi-thread", "macros", "fs"] }
 tokio-stream = "0.1.14"
 tokio-util = { version = "0.7.8", features = ["io"] }
-tower-http = { version = "0.4.3", features = ["fs"] }
+tower-http = { version = "0.4.3", features = ["fs", "cors"] }
 openssl = { version = "0.10.55", features = ["vendored"] }
+futures = "0.3.28"
+rand = "0.8.5"
