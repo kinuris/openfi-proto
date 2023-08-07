@@ -32,7 +32,7 @@ pub mod client_timer {
     };
     use tokio::time::interval;
 
-    use crate::{ClientConnections, RawClientDataCollection};
+    use crate::{ClientConnections, RawClientData, RawClientDataCollection};
 
     pub async fn decrement_active_user(db: DatabaseConnection, users: ClientConnections) {
         let mut interval = interval(Duration::from_secs(1));
@@ -49,18 +49,21 @@ pub mod client_timer {
                     .unwrap()
                     .unwrap();
 
+                let remaining_seconds = client.remaining_seconds - 1;
                 let mut client: client::ActiveModel = client.into();
 
-                client.remaining_seconds = ActiveValue::Set(*time - 1);
+                client.remaining_seconds = ActiveValue::Set(remaining_seconds);
                 client.update(&db).await.unwrap();
 
-                *time -= 1;
+                *time = remaining_seconds;
 
                 if *time <= 0 {
                     Command::new("ndsctl")
                         .arg("deauth")
                         .arg(mac)
                         .spawn()
+                        .unwrap()
+                        .wait()
                         .unwrap();
                 }
             }
@@ -83,12 +86,27 @@ pub mod client_timer {
 
             let mut users = users.lock().await;
 
+            // TODO: Replace stupid and potentially cyclical logic
+            for (mac, RawClientData { state, .. }) in &output.clients {
+                if state == "Authenticated" && !users.contains_key(mac) {
+                    Command::new("ndsctl")
+                        .arg("deauth")
+                        .arg(mac)
+                        .spawn()
+                        .unwrap()
+                        .wait()
+                        .unwrap();
+                }
+            }
+
             users.retain(|mac, _| {
                 if !output.clients.contains_key(mac) {
                     Command::new("ndsctl")
                         .arg("deauth")
                         .arg(mac)
                         .spawn()
+                        .unwrap()
+                        .wait()
                         .unwrap();
 
                     return false;
@@ -116,4 +134,21 @@ pub type ClientConnections = Arc<Mutex<HashMap<String, i32>>>;
 pub struct AppState {
     pub connection: DatabaseConnection,
     pub active_clients: ClientConnections,
+}
+
+#[derive(serde::Serialize)]
+pub struct ClientData {
+    pub id: i32,
+    pub mac: String,
+    pub credits: i32,
+    pub remaining_seconds: i32,
+    pub active: bool,
+}
+
+#[derive(serde::Serialize)]
+pub struct CodeData {
+    pub id: i32,
+    pub code: String,
+    pub kind: String,
+    pub units: i32,
 }
