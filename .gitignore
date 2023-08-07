@@ -6,3 +6,4 @@
 .env
 depl.sh
 data.sqlite
+.DS_Store
