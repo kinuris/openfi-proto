@@ -15,7 +15,7 @@ impl MigrationTrait for Migration {
             CREATE TABLE redeemable_code (
                 id INTEGER NOT NULL PRIMARY KEY,
                 code CHAR(10) NOT NULL,
-                kind TEXT CHECK(kind IN ('DATA', 'TIME')) NOT NULL,
+                kind TEXT CHECK(kind IN ('DATA', 'CREDIT', 'TIME')) NOT NULL,
                 units INT NOT NULL
             );
         ",
