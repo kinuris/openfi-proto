@@ -2,7 +2,7 @@
 linker = "arm-linux-gnueabihf-gcc"
 
 [target.armv7-unknown-linux-musleabihf]
-linker = "arm-linux-musleabihf-gcc"
+linker = "rust-lld"
 
 [alias]
 build-opi = "build --target armv7-unknown-linux-gnueabihf --release"
