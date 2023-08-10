@@ -7,5 +7,6 @@
 .env.production
 
 depl.sh
+musl-depl.sh
 data.sqlite
 .DS_Store
