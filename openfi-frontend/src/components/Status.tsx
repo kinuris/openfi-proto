@@ -15,6 +15,11 @@ export default component$(({ data }: { data: ClientData }) => {
         div p {
             text-align: center;
         }
+
+        h1 {
+            margin-bottom: 0.5em;
+            font-size: 2em;
+        }
     `);
 
     const disabled = useSignal(false);
@@ -40,6 +45,7 @@ export default component$(({ data }: { data: ClientData }) => {
 
     return (
         <>
+            <h1>User Data</h1>
             <div>
                 <p>Time: {secondsToFormattedTime(data.remainingSeconds)}</p>
                 <p>Credits: {data.credits} PHP</p>

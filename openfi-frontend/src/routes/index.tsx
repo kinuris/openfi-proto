@@ -1,4 +1,5 @@
 import { $, component$, useSignal, useStyles$, useStylesScoped$, useVisibleTask$ } from "@builder.io/qwik";
+import Plans from "~/components/Plans";
 import Status from "~/components/Status";
 import type { ClientData } from "~/util/types";
 
@@ -14,7 +15,7 @@ export default component$(() => {
   `);
 
   useStylesScoped$(`
-  section#status {
+  section#status, section#plans {
     color: white;
     background-color: var(--bg-color);
     height: 200px;
@@ -27,7 +28,7 @@ export default component$(() => {
   form {
     padding: 1em;
     background-color: var(--bg-color);
-    border-top: 1px solid orange;
+    border-top: 2px solid orange;
     border-bottom: 1px solid orange;
   }
 
@@ -122,10 +123,11 @@ export default component$(() => {
   return (
     <section class="container">
       <section id="status">
-        <h1>User Data</h1>
         {clientData.value ? <Status data={clientData.value} /> : <div>Loading...</div>}
       </section>
-
+      <section id="plans">
+        <Plans />
+      </section>
       <form onSubmit$={onRedeemHandler} preventdefault:submit>
         <h1>Redeem your time and data codes</h1>
         <input type="text" name="code" maxLength={10} placeholder="Enter Code" bind:value={code} />
