@@ -27,13 +27,12 @@ async fn main() {
 
     if cfg!(not(debug_assertions)) {
         // Separate thread
-
         tokio::spawn(decrement_active_user(
             connection.clone(),
             active_clients.clone(),
         ));
-        // Separate thread
 
+        // Separate thread
         tokio::spawn(assure_auth_client_state(active_clients.clone()));
     }
 
@@ -49,10 +48,12 @@ async fn main() {
         .route("/status", get(handlers::status::status))
         .route("/data", get(handlers::data::data))
         .route("/data-stream", get(handlers::data::data_stream))
+        .route("/get-plans", get(handlers::plans::plans))
         .route(
             "/request-access",
             post(handlers::request_access::request_access),
         )
+        .route("/spend/:kind/:id", post(handlers::credits::spend_credits))
         .route("/pause", post(handlers::pause::pause))
         .route("/gen-code/:kind/:units", post(handlers::code::gen_code))
         .route("/get-codes", post(handlers::code::get_codes))

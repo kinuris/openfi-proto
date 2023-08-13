@@ -101,7 +101,7 @@ pub struct CodeJSONBody {
     code: String,
 }
 
-// #[cfg(not(debug_assertions))]
+#[cfg(not(debug_assertions))]
 pub async fn redeem_code(
     session: ReadableSession,
     State(state): State<AppState>,
@@ -137,7 +137,7 @@ pub async fn redeem_code(
         .delete(&state.connection)
         .await
         .unwrap();
-    
+
     Ok(())
 }
 
@@ -169,7 +169,7 @@ pub async fn get_codes(
                 .map(|c| c.to_ascii_uppercase())
                 .map(char::from)
                 .collect(),
-            units: rand::thread_rng().gen_range((0..=10000)),
+            units: rand::thread_rng().gen_range((1000..=100000)),
             kind: if rand::thread_rng().gen_bool(0.5) {
                 "TIME".to_owned()
             } else {
@@ -181,7 +181,7 @@ pub async fn get_codes(
     Ok(Json(codes))
 }
 
-#[cfg(debug_assertionsf)]
+#[cfg(debug_assertions)]
 pub async fn redeem_code(Json(body): Json<CodeJSONBody>) -> Result<(), StatusCode> {
     println!("{}", body.code);
 
