@@ -47,6 +47,7 @@ pub async fn data(
     Ok(Json(json_data))
 }
 
+// NOTE: Error occurs when server is (re)started, while a client still has the webUI open
 #[cfg(not(debug_assertions))]
 pub async fn data_stream(
     session: ReadableSession,
@@ -55,7 +56,7 @@ pub async fn data_stream(
     HeaderMap,
     Sse<impl futures::Stream<Item = Result<Event, Infallible>>>,
 ) {
-    let mac = session.get::<String>("mac").unwrap();
+    let mac = session.get::<String>("mac").unwrap(); // TODO: Handle panic
 
     let stream = futures::stream::unfold((mac, state), |(mac, state)| async {
         let client = client::Entity::find()
@@ -83,7 +84,7 @@ pub async fn data_stream(
     .throttle(Duration::from_millis(250));
 
     let mut headers = HeaderMap::new();
-    headers.append("X-Accel-Buffering", "no".parse().unwrap());
+    headers.append("X-Accel-Buffering", "no".parse().unwrap()); // NOTE: Must be set if nginx is used as reverse-proxy
 
     let stream = Sse::new(
         stream

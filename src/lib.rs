@@ -82,7 +82,7 @@ pub mod client_timer {
             let output = serde_json::from_str::<RawClientDataCollection>(
                 std::str::from_utf8(&output.stdout).unwrap(),
             )
-            .unwrap();
+            .unwrap(); // TODO: Solve panics at runtime
 
             let mut users = users.lock().await;
 
@@ -151,4 +151,48 @@ pub struct CodeData {
     pub code: String,
     pub kind: String,
     pub units: i32,
+}
+
+#[derive(serde::Serialize)]
+pub struct PlanCollectionData {
+    pub time_plans: Vec<PlanData>,
+    pub data_plans: Vec<DataPlanData>,
+}
+
+#[derive(serde::Serialize)]
+pub struct PlanData {
+    pub id: i32,
+    pub name: String,
+    pub credit_cost: i32,
+    pub seconds_given: i32,
+}
+
+impl From<entity::plan::Model> for PlanData {
+    fn from(value: entity::plan::Model) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            credit_cost: value.credit_cost,
+            seconds_given: value.seconds_given,
+        }
+    }
+}
+
+#[derive(serde::Serialize)]
+pub struct DataPlanData {
+    pub id: i32,
+    pub name: String,
+    pub credit_cost: i32,
+    pub megabytes_given: i32,
+}
+
+impl From<entity::data_plan::Model> for DataPlanData {
+    fn from(value: entity::data_plan::Model) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            credit_cost: value.credit_cost,
+            megabytes_given: value.megabytes_given,
+        }
+    }
 }
